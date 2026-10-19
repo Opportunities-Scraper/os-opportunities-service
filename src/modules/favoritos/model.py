@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from sqlalchemy import TIMESTAMP, ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column
 
