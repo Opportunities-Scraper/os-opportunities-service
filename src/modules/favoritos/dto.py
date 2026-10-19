@@ -1,18 +1,11 @@
 from datetime import datetime
-from typing import Annotated, Self
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    model_validator,
-)
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class FavoritosBase(BaseModel):
-    model_config = ConfigDict(str_strip_whitespace=True)
-
-    data_criacao:datetime
+    usuario_id: int = Field(gt=0)
+    oportunidade_id: int = Field(gt=0)
 
 
 class FavoritosDTORequest(FavoritosBase):
@@ -22,5 +15,5 @@ class FavoritosDTORequest(FavoritosBase):
 class FavoritosDTOResponse(FavoritosBase):
     model_config = ConfigDict(from_attributes=True)
 
-    usuario_id:int 
-    oportunidade_id:int 
+    # Gerada pelo banco (server_default), por isso só aparece na resposta
+    data_criacao: datetime

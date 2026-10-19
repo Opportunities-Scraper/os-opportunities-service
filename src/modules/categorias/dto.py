@@ -1,28 +1,17 @@
-from datetime import datetime
-from typing import Annotated, Self
-
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    model_validator,
-)
+from pydantic import BaseModel, ConfigDict, Field
 
 
-
-class CategoriasBase(BaseModel):
+class CategoriaBase(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    titulo:str = Field(min_length=1, max_length=45)
+    titulo: str = Field(min_length=1, max_length=45)
 
 
-
-class CategoriasDTORequest(CategoriasBase):
+class CategoriaDTORequest(CategoriaBase):
     model_config = ConfigDict(extra="forbid")
 
 
-
-class CategoriasDTOResponse(CategoriasBase):
+class CategoriaDTOResponse(CategoriaBase):
     model_config = ConfigDict(from_attributes=True)
 
-    categoria_id:int
+    categoria_id: int
