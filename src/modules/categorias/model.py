@@ -1,5 +1,11 @@
+from sqlalchemy import String
+from sqlalchemy.orm import Mapped, mapped_column
+
+from src.app.database import Base
 
 
-class Categoria:
-    categoria_id: int
-    titulo: str 
+class Categoria(Base):
+    __tablename__ = "categoria"
+
+    categoria_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    titulo: Mapped[str] = mapped_column(String(45))
