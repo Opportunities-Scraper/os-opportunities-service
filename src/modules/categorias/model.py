@@ -1,7 +1,7 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.app.database import Base
+from db.database import Base
 
 
 class Categoria(Base):
