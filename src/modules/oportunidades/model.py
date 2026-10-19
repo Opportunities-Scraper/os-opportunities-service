@@ -1,15 +1,21 @@
-from src.modules.categorias.model import Categoria
-from src.modules.modalidade.model import Modalidade
+from datetime import datetime
+
+from sqlalchemy import DateTime, ForeignKey, String, Text
+from sqlalchemy.orm import Mapped, mapped_column
+
+from src.app.database import Base
 
 
-class Oportunidade:
-    oportunidad_id: int
-    titulo: str 
-    descricao: str 
-    url_original: str 
-    ṕai: str 
-    cidade: str 
-    modalidade: Modalidade 
-    data_publicacao: str
-    data_limite: str 
-    categoria_id: int
+class Oportunidade(Base):
+    __tablename__ = "oportunidade"
+
+    oportunidade_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    titulo: Mapped[str] = mapped_column(String(255))
+    descricao: Mapped[str] = mapped_column(Text)
+    url_original: Mapped[str] = mapped_column(Text)
+    pais: Mapped[str] = mapped_column(String(45))
+    cidade: Mapped[str] = mapped_column(String(45))
+    data_publicacao: Mapped[datetime] = mapped_column(DateTime)
+    data_limite: Mapped[datetime] = mapped_column(DateTime)
+    modalidade_id: Mapped[int] = mapped_column(ForeignKey("modalidade.modalidade_id"))
+    categoria_id: Mapped[int] = mapped_column(ForeignKey("categoria.categoria_id"))
