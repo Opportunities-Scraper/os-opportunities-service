@@ -8,7 +8,7 @@ from modules.categoria.dto import CategoriaDTORequest, CategoriaDTOResponse
 from modules.categoria.repository import CategoriaRepository
 from modules.categoria.service import CategoriaService
 
-router = APIRouter(prefix="/categorias", tags=["Categorias"])
+router = APIRouter(prefix="/categoria", tags=["Categoria"])
 
 
 

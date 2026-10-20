@@ -8,7 +8,7 @@ from modules.modalidade.dto import ModalidadeDTORequest, ModalidadeDTOResponse
 from modules.modalidade.repository import ModalidadeRepository
 from modules.modalidade.service import ModalidadeService
 
-router = APIRouter(prefix="/modalidades", tags=["Modalidades"])
+router = APIRouter(prefix="/modalidade", tags=["Modalidade"])
 
 
 def get_modalidade_service(session: Annotated[Session, Depends(get_session)],) -> ModalidadeService:
