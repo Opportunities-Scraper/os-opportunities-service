@@ -11,9 +11,7 @@ from modules.modalidade.service import ModalidadeService
 router = APIRouter(prefix="/modalidades", tags=["Modalidades"])
 
 
-def get_modalidade_service(
-    session: Annotated[Session, Depends(get_session)],
-) -> ModalidadeService:
+def get_modalidade_service(session: Annotated[Session, Depends(get_session)],) -> ModalidadeService:
     return ModalidadeService(ModalidadeRepository(session))
 
 

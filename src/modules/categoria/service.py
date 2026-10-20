@@ -64,12 +64,15 @@ class CategoriaService:
                 detail="Categoria não encontrada",
             )
 
-        elif dados.titulo is not None:
+        # Manter o próprio título é permitido; só conflita se pertencer a outra categoria
+        existente = self.repository.get_by_title(dados.titulo)
+
+        if existente is not None and existente.categoria_id != categoria_id:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Já existe uma categoria com esse título",
             )
-    
+
         categoria.titulo = dados.titulo
         return CategoriaDTOResponse.model_validate(self.repository.insert(categoria))
 

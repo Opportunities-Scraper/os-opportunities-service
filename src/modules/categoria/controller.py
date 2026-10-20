@@ -31,7 +31,8 @@ def buscar_categoria_id(categoria_id: CategoriaId, service: ServiceMap):
     return service.buscar_por_id(categoria_id)
 
 
-@router.get("/{cateforia_nome}", response_model=CategoriaDTOResponse)
+# Prefixo /titulo evita conflito com /{categoria_id}, que capturaria qualquer texto
+@router.get("/titulo/{categoria_nome}", response_model=CategoriaDTOResponse)
 def buscar_categoria_nome(categoria_nome: CategoriaNome, service: ServiceMap) :
     return service.buscar_por_titulo(categoria_nome)
 
