@@ -28,6 +28,18 @@ class CategoriaService:
         return CategoriaDTOResponse.model_validate(categoria)
 
 
+    def buscar_por_titulo(self, categoria_nome: str) -> CategoriaDTOResponse:
+        categoria = self.repository.get_by_title(categoria_nome)
+
+        if categoria is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Categoria não encontrada",
+            )
+
+        return CategoriaDTOResponse.model_validate(categoria)
+
+
     def criar(self, dados: CategoriaDTORequest) -> CategoriaDTOResponse:
         existente = self.repository.get_by_title(dados.titulo)
 
