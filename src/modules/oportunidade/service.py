@@ -77,9 +77,15 @@ class OportunidadeService:
                 detail="Já existe uma oportunidade com essa URL",
             )
 
-        # Copia todos os campos do DTO, sem risco de esquecer ou trocar algum
-        for campo, valor in dados.model_dump().items():
-            setattr(oportunidade, campo, valor)
+        oportunidade.titulo = dados.titulo
+        oportunidade.descricao = dados.descricao
+        oportunidade.url_original = dados.url_original
+        oportunidade.pais = dados.pais
+        oportunidade.cidade = dados.cidade
+        oportunidade.data_publicacao = dados.data_publicacao
+        oportunidade.data_limite = dados.data_limite
+        oportunidade.modalidade_id = dados.modalidade_id
+        oportunidade.categoria_id = dados.categoria_id
 
         try:
             # Salva o próprio objeto alterado; criar um Oportunidade novo duplicaria o registro
