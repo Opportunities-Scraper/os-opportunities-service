@@ -4,10 +4,13 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from db.database import Base
+from modules.exceptions import NaoEncontradoError
 
 
 class BaseRepository[Model: Base]:
     model: type[Model]
+    # Mensagem do get_or_raise (ex.: "Categoria não encontrada")
+    nao_encontrado: str = "Registro não encontrado"
 
     def __init__(self, session: Session):
         self.session = session
@@ -17,6 +20,12 @@ class BaseRepository[Model: Base]:
 
     def get_by_id(self, id: int) -> Model | None:
         return self.session.get(self.model, id)
+
+    def get_or_raise(self, id: int) -> Model:
+        obj = self.get_by_id(id)
+        if obj is None:
+            raise NaoEncontradoError(self.nao_encontrado)
+        return obj
 
     # Os métodos de escrita não fazem commit: o flush só envia o SQL dentro da
     # transação aberta. Quem grava ou desfaz é o service, pela UnitOfWork.
