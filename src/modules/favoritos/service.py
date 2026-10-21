@@ -18,7 +18,7 @@ class FavoritosService:
         return [FavoritosDTOResponse.model_validate(f) for f in favoritos]
 
 
-    def buscar_oportunidade_favoritada(self, usuario_id: int, oportunidade_id: int) -> FavoritosDTOResponse:
+    def buscar_relacao(self, usuario_id: int, oportunidade_id: int) -> FavoritosDTOResponse:
         favorito = self.repository.get_favorito(usuario_id, oportunidade_id)
 
         if favorito is None:

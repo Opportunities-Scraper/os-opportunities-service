@@ -29,7 +29,7 @@ def listar_favoritos(usuario_id: UsuarioId, service: ServiceMap):
 # Útil para o frontend saber se a oportunidade já está favoritada (ex.: ícone de coração)
 @router.get("/{oportunidade_id}", response_model=FavoritosDTOResponse)
 def buscar_favorito(oportunidade_id: OportunidadeId, usuario_id: UsuarioId, service: ServiceMap):
-    return service.buscar_oportunidade_favoritada(usuario_id, oportunidade_id)
+    return service.buscar_relacao(usuario_id, oportunidade_id)
 
 
 @router.post("", response_model=FavoritosDTOResponse, status_code=status.HTTP_201_CREATED)
