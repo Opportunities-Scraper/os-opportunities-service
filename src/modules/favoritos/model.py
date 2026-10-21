@@ -1,8 +1,10 @@
 from datetime import datetime
+
 from sqlalchemy import TIMESTAMP, ForeignKey, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db.database import Base
+from modules.oportunidade.model import Oportunidade
 
 
 class Favoritos(Base):
@@ -16,3 +18,6 @@ class Favoritos(Base):
     data_criacao: Mapped[datetime] = mapped_column(
         TIMESTAMP, server_default=func.current_timestamp()
     )
+
+    # Permite devolver os dados da oportunidade junto com o favorito
+    oportunidade: Mapped[Oportunidade] = relationship()
