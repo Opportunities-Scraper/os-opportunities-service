@@ -18,9 +18,15 @@ class BaseRepository[Model: Base]:
     def get_by_id(self, id: int) -> Model | None:
         return self.session.get(self.model, id)
 
+    # Os métodos de escrita não fazem commit: o flush só envia o SQL dentro da
+    # transação aberta. Quem grava ou desfaz é o service, pela UnitOfWork.
+    # O flush também faz erros do banco (ex.: FK inválida) aparecerem aqui, dentro
+    # do bloco do service, e não só no commit.
+
     def insert(self, obj: Model) -> Model:
         self.session.add(obj)
-        self.session.commit()
+        self.session.flush()
+        # Carrega valores gerados pelo banco, como o id e o data_criacao de favoritos
         self.session.refresh(obj)
         return obj
 
@@ -31,13 +37,9 @@ class BaseRepository[Model: Base]:
                 raise AttributeError(f"{self.model.__name__} não tem o campo '{campo}'")
             setattr(obj, campo, valor)
 
-        self.session.commit()
-        self.session.refresh(obj)
+        self.session.flush()
         return obj
 
     def delete(self, obj: Model) -> None:
         self.session.delete(obj)
-        self.session.commit()
-
-    def rollback(self) -> None:
-        self.session.rollback()
+        self.session.flush()

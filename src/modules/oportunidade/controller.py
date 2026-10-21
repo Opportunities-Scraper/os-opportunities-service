@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Path, status
 from sqlalchemy.orm import Session
 
 from db.database import get_session
+from db.unit_of_work import UnitOfWork
 from modules.oportunidade.dto import OportunidadeDTORequest, OportunidadeDTOResponse
 from modules.oportunidade.repository import OportunidadeRepository
 from modules.oportunidade.service import OportunidadeService
@@ -12,7 +13,7 @@ router = APIRouter(prefix="/oportunidade", tags=["Oportunidade"])
 
 
 def get_oportunidade_service(session: Annotated[Session, Depends(get_session)],) -> OportunidadeService:
-    return OportunidadeService(OportunidadeRepository(session))
+    return OportunidadeService(OportunidadeRepository(session), UnitOfWork(session))
 
 
 ServiceMap = Annotated[OportunidadeService, Depends(get_oportunidade_service)]

@@ -1,14 +1,16 @@
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 
+from db.unit_of_work import UnitOfWork
 from modules.categoria.dto import CategoriaDTORequest, CategoriaDTOResponse
 from modules.categoria.model import Categoria
 from modules.categoria.repository import CategoriaRepository
 
 
 class CategoriaService:
-    def __init__(self, repository: CategoriaRepository):
+    def __init__(self, repository: CategoriaRepository, uow: UnitOfWork):
         self.repository = repository
+        self.uow = uow
 
 
     def listar(self) -> list[CategoriaDTOResponse]:
@@ -49,7 +51,8 @@ class CategoriaService:
                 detail="Já existe uma categoria com esse título",
             )
         
-        categoria = self.repository.insert(Categoria(**dados.model_dump()))
+        with self.uow:
+            categoria = self.repository.insert(Categoria(**dados.model_dump()))
 
         return CategoriaDTOResponse.model_validate(categoria)
 
@@ -73,7 +76,9 @@ class CategoriaService:
                 detail="Já existe uma categoria com esse título",
             )
 
-        categoria = self.repository.update(categoria, dados.model_dump())
+        with self.uow:
+            categoria = self.repository.update(categoria, dados.model_dump())
+
         return CategoriaDTOResponse.model_validate(categoria)
 
     def deletar(self, categoria_id: int) -> None:
@@ -86,11 +91,11 @@ class CategoriaService:
             )
         
         try:
-            self.repository.delete(categoria)
-            
+            with self.uow:
+                self.repository.delete(categoria)
+
         except IntegrityError:
             # A FK de oportunidade.categoria_id impede apagar uma categoria em uso
-            self.repository.rollback()
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Categoria possui oportunidades vinculadas e não pode ser removida",

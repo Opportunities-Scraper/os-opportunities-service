@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Path, status
 from sqlalchemy.orm import Session
 
 from db.database import get_session
+from db.unit_of_work import UnitOfWork
 from modules.categoria.dto import CategoriaDTORequest, CategoriaDTOResponse
 from modules.categoria.repository import CategoriaRepository
 from modules.categoria.service import CategoriaService
@@ -13,7 +14,7 @@ router = APIRouter(prefix="/categoria", tags=["Categoria"])
 
 
 def get_categoria_service(session: Annotated[Session, Depends(get_session)]) -> CategoriaService:
-    return CategoriaService(CategoriaRepository(session))
+    return CategoriaService(CategoriaRepository(session), UnitOfWork(session))
 
 
 ServiceMap = Annotated[CategoriaService, Depends(get_categoria_service)]

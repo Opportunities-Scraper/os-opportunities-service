@@ -1,14 +1,16 @@
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 
+from db.unit_of_work import UnitOfWork
 from modules.oportunidade.dto import OportunidadeDTORequest, OportunidadeDTOResponse
 from modules.oportunidade.model import Oportunidade
 from modules.oportunidade.repository import OportunidadeRepository
 
 
 class OportunidadeService:
-    def __init__(self, repository: OportunidadeRepository):
+    def __init__(self, repository: OportunidadeRepository, uow: UnitOfWork):
         self.repository = repository
+        self.uow = uow
 
     def listar(self) -> list[OportunidadeDTOResponse]:
         oportunidades = self.repository.get_all()
@@ -47,12 +49,11 @@ class OportunidadeService:
             )
 
         try:
-            oportunidade = self.repository.insert(Oportunidade(**dados.model_dump()))
+            with self.uow:
+                oportunidade = self.repository.insert(Oportunidade(**dados.model_dump()))
 
         except IntegrityError:
             # As FKs rejeitam modalidade_id ou categoria_id que não existem
-            self.repository.rollback()
-
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="modalidade_id ou categoria_id não existe",
@@ -77,24 +78,21 @@ class OportunidadeService:
                 detail="Já existe uma oportunidade com essa URL",
             )
 
-        oportunidade.titulo = dados.titulo
-        oportunidade.descricao = dados.descricao
-        oportunidade.url_original = dados.url_original
-        oportunidade.pais = dados.pais
-        oportunidade.cidade = dados.cidade
-        oportunidade.data_publicacao = dados.data_publicacao
-        oportunidade.data_limite = dados.data_limite
-        oportunidade.modalidade_id = dados.modalidade_id
-        oportunidade.categoria_id = dados.categoria_id
-
         try:
-            # Salva o próprio objeto alterado; criar um Oportunidade novo duplicaria o registro
-            oportunidade = self.repository.insert(oportunidade)
+            # O objeto já está na sessão: basta alterá-lo, e o commit da uow grava
+            with self.uow:
+                oportunidade.titulo = dados.titulo
+                oportunidade.descricao = dados.descricao
+                oportunidade.url_original = dados.url_original
+                oportunidade.pais = dados.pais
+                oportunidade.cidade = dados.cidade
+                oportunidade.data_publicacao = dados.data_publicacao
+                oportunidade.data_limite = dados.data_limite
+                oportunidade.modalidade_id = dados.modalidade_id
+                oportunidade.categoria_id = dados.categoria_id
 
         except IntegrityError:
             # As FKs rejeitam modalidade_id ou categoria_id que não existem
-            self.repository.rollback()
-
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="modalidade_id ou categoria_id não existe",
@@ -112,11 +110,11 @@ class OportunidadeService:
             )
 
         try:
-            self.repository.delete(oportunidade)
+            with self.uow:
+                self.repository.delete(oportunidade)
 
         except IntegrityError:
             # A FK de favoritos.oportunidade_id impede apagar uma oportunidade favoritada
-            self.repository.rollback()
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Oportunidade está nos favoritos de algum usuário e não pode ser removida",

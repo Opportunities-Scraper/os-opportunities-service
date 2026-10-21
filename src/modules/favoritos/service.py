@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 
+from db.unit_of_work import UnitOfWork
 from modules.favoritos.dto import FavoritosDTORequest, FavoritosDTOResponse
 from modules.favoritos.model import Favoritos
 from modules.favoritos.repository import FavoritosRepository
@@ -8,9 +9,10 @@ from modules.oportunidade.repository import OportunidadeRepository
 
 
 class FavoritosService:
-    def __init__(self,repository: FavoritosRepository, oportunidade_repository: OportunidadeRepository):
+    def __init__(self, repository: FavoritosRepository, oportunidade_repository: OportunidadeRepository, uow: UnitOfWork):
         self.repository = repository
         self.oportunidade_repository = oportunidade_repository
+        self.uow = uow
 
 
     def listar(self, usuario_id: int) -> list[FavoritosDTOResponse]:
@@ -47,12 +49,12 @@ class FavoritosService:
             )
 
         try:
-            favorito = self.repository.insert(Favoritos(usuario_id=usuario_id, oportunidade_id=dados.oportunidade_id))
+            with self.uow:
+                favorito = self.repository.insert(Favoritos(usuario_id=usuario_id, oportunidade_id=dados.oportunidade_id))
 
         except IntegrityError:
             # Duas requisições simultâneas para o mesmo favorito, ou usuario_id que
             # não existe na tabela usuario (a FK existe no banco, mas não é mapeada aqui)
-            self.repository.rollback()
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Não foi possível adicionar o favorito",
@@ -69,4 +71,5 @@ class FavoritosService:
                 detail="Oportunidade não está nos favoritos",
             )
 
-        self.repository.delete(favorito)
+        with self.uow:
+            self.repository.delete(favorito)

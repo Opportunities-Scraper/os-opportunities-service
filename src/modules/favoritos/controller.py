@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from auth.dependencies import UsuarioId
 from db.database import get_session
+from db.unit_of_work import UnitOfWork
 from modules.favoritos.dto import FavoritosDTORequest, FavoritosDTOResponse
 from modules.favoritos.repository import FavoritosRepository
 from modules.favoritos.service import FavoritosService
@@ -14,7 +15,7 @@ router = APIRouter(prefix="/favoritos", tags=["Favoritos"])
 
 
 def get_favoritos_service(session: Annotated[Session, Depends(get_session)],) -> FavoritosService:
-    return FavoritosService(FavoritosRepository(session), OportunidadeRepository(session))
+    return FavoritosService(FavoritosRepository(session), OportunidadeRepository(session), UnitOfWork(session))
 
 
 ServiceMap = Annotated[FavoritosService, Depends(get_favoritos_service)]
