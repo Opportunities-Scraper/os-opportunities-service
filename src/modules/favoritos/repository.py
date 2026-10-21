@@ -18,7 +18,7 @@ class FavoritosRepository(BaseRepository[Favoritos]):
         return list(
             self.session.scalars(
                 select(Favoritos)
-                .options(joinedload(Favoritos.oportunidade, inner_join=True))
+                .options(joinedload(Favoritos.oportunidade, innerjoin=True))
                 .where(Favoritos.usuario_id == usuario_id)
                 .order_by(Favoritos.data_criacao.desc())
             )

@@ -1,3 +1,5 @@
+from typing import Any
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -18,6 +20,17 @@ class BaseRepository[Model: Base]:
 
     def insert(self, obj: Model) -> Model:
         self.session.add(obj)
+        self.session.commit()
+        self.session.refresh(obj)
+        return obj
+
+    def update(self, obj: Model, valores: dict[str, Any]) -> Model:
+        for campo, valor in valores.items():
+            # Sem essa checagem, setattr com nome errado não falha nem salva nada
+            if not hasattr(self.model, campo):
+                raise AttributeError(f"{self.model.__name__} não tem o campo '{campo}'")
+            setattr(obj, campo, valor)
+
         self.session.commit()
         self.session.refresh(obj)
         return obj

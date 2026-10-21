@@ -73,8 +73,8 @@ class CategoriaService:
                 detail="Já existe uma categoria com esse título",
             )
 
-        categoria.titulo = dados.titulo
-        return CategoriaDTOResponse.model_validate(self.repository.insert(categoria))
+        categoria = self.repository.update(categoria, dados.model_dump())
+        return CategoriaDTOResponse.model_validate(categoria)
 
     def deletar(self, categoria_id: int) -> None:
         categoria = self.repository.get_by_id(categoria_id)

@@ -67,8 +67,8 @@ class ModalidadeService:
                 detail="Já existe uma modalidade com esse título",
             )
 
-        modalidade.titulo = dados.titulo
-        return ModalidadeDTOResponse.model_validate(self.repository.insert(modalidade))
+        modalidade = self.repository.update(modalidade, dados.model_dump())
+        return ModalidadeDTOResponse.model_validate(modalidade)
 
     def deletar(self, modalidade_id: int) -> None:
         modalidade = self.repository.get_by_id(modalidade_id)
