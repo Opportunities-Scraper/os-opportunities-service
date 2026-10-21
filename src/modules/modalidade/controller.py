@@ -1,19 +1,16 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, status
-from sqlalchemy.orm import Session
 
-from db.database import get_session
-from db.unit_of_work import UnitOfWork
+from db.unit_of_work import UnitOfWork, get_unit_of_work
 from modules.modalidade.dto import ModalidadeDTORequest, ModalidadeDTOResponse
-from modules.modalidade.repository import ModalidadeRepository
 from modules.modalidade.service import ModalidadeService
 
 router = APIRouter(prefix="/modalidade", tags=["Modalidade"])
 
 
-def get_modalidade_service(session: Annotated[Session, Depends(get_session)],) -> ModalidadeService:
-    return ModalidadeService(ModalidadeRepository(session), UnitOfWork(session))
+def get_modalidade_service(uow: Annotated[UnitOfWork, Depends(get_unit_of_work)]) -> ModalidadeService:
+    return ModalidadeService(uow)
 
 
 ServiceMap = Annotated[ModalidadeService, Depends(get_modalidade_service)]
