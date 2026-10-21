@@ -6,6 +6,7 @@ from modules.repository import BaseRepository
 
 class OportunidadeRepository(BaseRepository[Oportunidade]):
     model = Oportunidade
+    nao_encontrado = "Oportunidade não encontrada"
 
     def get_by_url(self, url_original: str) -> Oportunidade | None:
         return self.session.scalar(select(Oportunidade).where(Oportunidade.url_original == url_original))
