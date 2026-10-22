@@ -24,7 +24,7 @@ class OportunidadeService:
         oportunidades = self.transaction.oportunidades.get_by_categoria_id(categoria_id)
         return [OportunidadeDTOResponse.model_validate(o) for o in oportunidades]
 
-    def criar(self, dados: OportunidadeDTORequest) -> OportunidadeDTOResponse:
+    def adicionar(self, dados: OportunidadeDTORequest) -> OportunidadeDTOResponse:
         existente = self.transaction.oportunidades.get_by_url(dados.url_original)
 
         if existente is not None:

@@ -24,7 +24,7 @@ class CategoriaService:
 
         return CategoriaDTOResponse.model_validate(categoria)
 
-    def criar(self, dados: CategoriaDTORequest) -> CategoriaDTOResponse:
+    def adicionar(self, dados: CategoriaDTORequest) -> CategoriaDTOResponse:
         existente = self.transaction.categorias.get_by_title(dados.titulo)
 
         if existente is not None:

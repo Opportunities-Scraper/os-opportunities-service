@@ -41,8 +41,8 @@ def buscar_oportunidades_categoria(categoria_id: CategoriaId, service: ServiceMa
 
 
 @router.post("", response_model=OportunidadeDTOResponse, status_code=status.HTTP_201_CREATED)
-def criar_oportunidade(dados: OportunidadeDTORequest, service: ServiceMap):
-    return service.criar(dados)
+def adicionar_oportunidade(dados: OportunidadeDTORequest, service: ServiceMap):
+    return service.adicionar(dados)
 
 
 @router.put("/{oportunidade_id}", response_model=OportunidadeDTOResponse)

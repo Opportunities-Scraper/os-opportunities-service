@@ -24,7 +24,7 @@ class ModalidadeService:
 
         return ModalidadeDTOResponse.model_validate(modalidade)
 
-    def criar(self, dados: ModalidadeDTORequest) -> ModalidadeDTOResponse:
+    def adicionar(self, dados: ModalidadeDTORequest) -> ModalidadeDTOResponse:
         existente = self.transaction.modalidades.get_by_title(dados.titulo)
 
         if existente is not None:

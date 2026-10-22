@@ -35,8 +35,8 @@ def buscar_categoria_nome(categoria_nome: CategoriaNome, service: ServiceMap) :
 
 
 @router.post("", response_model=CategoriaDTOResponse, status_code=status.HTTP_201_CREATED)
-def criar_categoria(dados: CategoriaDTORequest, service: ServiceMap):
-    return service.criar(dados)
+def adicionar_categoria(dados: CategoriaDTORequest, service: ServiceMap):
+    return service.adicionar(dados)
 
 
 @router.put("/{categoria_id}", response_model=CategoriaDTOResponse)

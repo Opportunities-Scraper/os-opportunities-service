@@ -35,8 +35,8 @@ def buscar_modalidade_titulo(modalidade_titulo: ModalidadeTitulo, service: Servi
 
 
 @router.post("", response_model=ModalidadeDTOResponse, status_code=status.HTTP_201_CREATED)
-def criar_modalidade(dados: ModalidadeDTORequest, service: ServiceMap):
-    return service.criar(dados)
+def adicionar_modalidade(dados: ModalidadeDTORequest, service: ServiceMap):
+    return service.adicionar(dados)
 
 
 @router.put("/{modalidade_id}", response_model=ModalidadeDTOResponse)
