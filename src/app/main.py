@@ -9,6 +9,9 @@ from modules.exceptions import (
     ReferenciaInvalidaError,
 )
 
+from contextlib import asynccontextmanager
+from db.database import Base, engine
+
 from modules.modalidade.controller import router as modalidade_router
 from modules.categoria.controller import router as categoria_router
 from modules.favoritos.controller import router as favoritos_router
@@ -18,7 +21,15 @@ from modules.oportunidade.controller import router as oportunidade_router
 
 
 
-app = FastAPI(title="Opportunities Service")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # No MySQL o schema já existe e é mantido fora deste serviço
+    if engine.dialect.name == "sqlite":
+        Base.metadata.create_all(engine)
+    yield
+
+
+app = FastAPI(title="Opportunities Service", lifespan=lifespan) 
 
 for router in (categoria_router, modalidade_router, oportunidade_router, favoritos_router):
     app.include_router(router)

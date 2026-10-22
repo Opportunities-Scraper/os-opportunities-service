@@ -18,7 +18,9 @@ __pycache__/
 .ruff_cache/
 
 
-
 # MDs
 ex1.md
 ex2.md
+
+# Mock banco de dados
+mock.sqlite
