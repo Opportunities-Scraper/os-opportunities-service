@@ -16,13 +16,13 @@ from modules.oportunidade.repository import OportunidadeRepository
 # Controla a transação de uma operação de escrita. Os repositories só enviam o SQL
 # (flush); quem decide gravar é o service, ao sair do bloco:
 #
-#     with self.uow:
-#         self.uow.favoritos.delete(...)
-#         self.uow.oportunidades.delete(...)
+#     with self.transaction:
+#         self.transaction.favoritos.delete(...)
+#         self.transaction.oportunidades.delete(...)
 #
 # Se o bloco termina sem erro, tudo é gravado (commit). Se qualquer passo falhar,
 # nada é gravado (rollback), inclusive o que os passos anteriores já tinham feito.
-class UnitOfWork:
+class Transaction:
     def __init__(self, session: Session):
         self.session = session
 
@@ -38,14 +38,14 @@ class UnitOfWork:
         return self
 
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, tb: TracebackType | None) -> None:
+    def __exit__(self, exception: BaseException | None, exception_type: type[BaseException] | None, tb: TracebackType | None) -> None:
 
-        if exc_type is not None:
+        if exception_type is not None:
             self.session.rollback()
-            # Traduz o erro do SQLAlchemy para que os services não dependam do ORM
 
-            if isinstance(exc, IntegrityError):
-                raise IntegridadeError("A operação viola uma restrição do banco") from exc
+            # Traduz o erro do SQLAlchemy para que os services não dependam do ORM
+            if isinstance(exception, IntegrityError):
+                raise IntegridadeError("A operação viola uma restrição do banco") from exception
             return
 
         try:
@@ -53,6 +53,7 @@ class UnitOfWork:
 
         except IntegrityError as erro:
             self.session.rollback()
+            
             raise IntegridadeError("A operação viola uma restrição do banco") from erro
         
         except Exception:
@@ -60,5 +61,5 @@ class UnitOfWork:
             raise
 
 
-def get_unit_of_work(session: Annotated[Session, Depends(get_session)]) -> UnitOfWork:
-    return UnitOfWork(session)
+def get_transaction(session: Annotated[Session, Depends(get_session)]) -> Transaction:
+    return Transaction(session)

@@ -2,14 +2,14 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, status
 
-from db.unit_of_work import UnitOfWork, get_unit_of_work
+from db.transaction import Transaction, get_transaction
 from modules.categoria.dto import CategoriaDTORequest, CategoriaDTOResponse
 from modules.categoria.service import CategoriaService
 
 router = APIRouter(prefix="/categoria", tags=["Categoria"])
 
 
-def get_categoria_service(uow: Annotated[UnitOfWork, Depends(get_unit_of_work)]) -> CategoriaService:
+def get_categoria_service(uow: Annotated[Transaction, Depends(get_transaction)]) -> CategoriaService:
     return CategoriaService(uow)
 
 

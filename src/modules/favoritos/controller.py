@@ -3,14 +3,14 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Path, status
 
 from auth.dependencies import UsuarioId
-from db.unit_of_work import UnitOfWork, get_unit_of_work
+from db.transaction import Transaction, get_transaction
 from modules.favoritos.dto import FavoritosDTORequest, FavoritosDTOResponse
 from modules.favoritos.service import FavoritosService
 
 router = APIRouter(prefix="/favoritos", tags=["Favoritos"])
 
 
-def get_favoritos_service(uow: Annotated[UnitOfWork, Depends(get_unit_of_work)]) -> FavoritosService:
+def get_favoritos_service(uow: Annotated[Transaction, Depends(get_transaction)]) -> FavoritosService:
     return FavoritosService(uow)
 
 

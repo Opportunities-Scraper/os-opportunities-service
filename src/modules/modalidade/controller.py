@@ -2,14 +2,14 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, status
 
-from db.unit_of_work import UnitOfWork, get_unit_of_work
+from db.transaction import Transaction, get_transaction
 from modules.modalidade.dto import ModalidadeDTORequest, ModalidadeDTOResponse
 from modules.modalidade.service import ModalidadeService
 
 router = APIRouter(prefix="/modalidade", tags=["Modalidade"])
 
 
-def get_modalidade_service(uow: Annotated[UnitOfWork, Depends(get_unit_of_work)]) -> ModalidadeService:
+def get_modalidade_service(uow: Annotated[Transaction, Depends(get_transaction)]) -> ModalidadeService:
     return ModalidadeService(uow)
 
 

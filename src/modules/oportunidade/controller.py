@@ -2,14 +2,14 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, status
 
-from db.unit_of_work import UnitOfWork, get_unit_of_work
+from db.transaction import Transaction, get_transaction
 from modules.oportunidade.dto import OportunidadeDTORequest, OportunidadeDTOResponse
 from modules.oportunidade.service import OportunidadeService
 
 router = APIRouter(prefix="/oportunidade", tags=["Oportunidade"])
 
 
-def get_oportunidade_service(uow: Annotated[UnitOfWork, Depends(get_unit_of_work)]) -> OportunidadeService:
+def get_oportunidade_service(uow: Annotated[Transaction, Depends(get_transaction)]) -> OportunidadeService:
     return OportunidadeService(uow)
 
 

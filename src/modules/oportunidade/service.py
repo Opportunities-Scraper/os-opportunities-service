@@ -1,86 +1,60 @@
-from fastapi import HTTPException, status
-from sqlalchemy.exc import IntegrityError
-
-from db.unit_of_work import UnitOfWork
+from db.transaction import Transaction
+from modules.exceptions import ConflitoError, IntegridadeError, ReferenciaInvalidaError
 from modules.oportunidade.dto import OportunidadeDTORequest, OportunidadeDTOResponse
 from modules.oportunidade.model import Oportunidade
-from modules.oportunidade.repository import OportunidadeRepository
 
 
 class OportunidadeService:
-    def __init__(self, repository: OportunidadeRepository, uow: UnitOfWork):
-        self.repository = repository
-        self.uow = uow
+    def __init__(self, transaction: Transaction):
+        self.transaction = transaction
 
     def listar(self) -> list[OportunidadeDTOResponse]:
-        oportunidades = self.repository.get_all()
+        oportunidades = self.transaction.oportunidades.get_all()
         return [OportunidadeDTOResponse.model_validate(o) for o in oportunidades]
 
     def buscar_por_id(self, oportunidade_id: int) -> OportunidadeDTOResponse:
-        oportunidade = self.repository.get_by_id(oportunidade_id)
-
-        if oportunidade is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Oportunidade não encontrada",
-            )
-
+        oportunidade = self.transaction.oportunidades.get_or_raise(oportunidade_id)
         return OportunidadeDTOResponse.model_validate(oportunidade)
 
-
     def buscar_por_modalidade_id(self, modalidade_id: int) -> list[OportunidadeDTOResponse]:
-        oportunidades = self.repository.get_by_modalidade_id(modalidade_id)
+        oportunidades = self.transaction.oportunidades.get_by_modalidade_id(modalidade_id)
         return [OportunidadeDTOResponse.model_validate(o) for o in oportunidades]
-
 
     def buscar_por_categoria_id(self, categoria_id: int) -> list[OportunidadeDTOResponse]:
-        oportunidades = self.repository.get_by_categoria_id(categoria_id)
+        oportunidades = self.transaction.oportunidades.get_by_categoria_id(categoria_id)
         return [OportunidadeDTOResponse.model_validate(o) for o in oportunidades]
 
-
-
     def criar(self, dados: OportunidadeDTORequest) -> OportunidadeDTOResponse:
-        existente = self.repository.get_by_url(dados.url_original)
+        existente = self.transaction.oportunidades.get_by_url(dados.url_original)
 
         if existente is not None:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Já existe uma oportunidade com essa URL",
-            )
+            raise ConflitoError("Já existe uma oportunidade com essa URL")
 
         try:
-            with self.uow:
-                oportunidade = self.repository.insert(Oportunidade(**dados.model_dump()))
+            with self.transaction:
+                oportunidade = self.transaction.oportunidades.insert(
+                    Oportunidade(**dados.model_dump())
+                )
 
-        except IntegrityError:
+        except IntegridadeError as erro:
             # As FKs rejeitam modalidade_id ou categoria_id que não existem
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail="modalidade_id ou categoria_id não existe",
-            )
+            raise ReferenciaInvalidaError(
+                "modalidade_id ou categoria_id não existe"
+            ) from erro
 
         return OportunidadeDTOResponse.model_validate(oportunidade)
 
     def atualizar(self, oportunidade_id: int, dados: OportunidadeDTORequest) -> OportunidadeDTOResponse:
-        oportunidade = self.repository.get_by_id(oportunidade_id)
+        oportunidade = self.transaction.oportunidades.get_or_raise(oportunidade_id)
 
-        if oportunidade is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Oportunidade não encontrada",
-            )
-
-        existente = self.repository.get_by_url(dados.url_original)
+        existente = self.transaction.oportunidades.get_by_url(dados.url_original)
 
         if existente is not None and existente.oportunidade_id != oportunidade_id:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Já existe uma oportunidade com essa URL",
-            )
+            raise ConflitoError("Já existe uma oportunidade com essa URL")
 
         try:
-            # O objeto já está na sessão: basta alterá-lo, e o commit da uow grava
-            with self.uow:
+            # O objeto já está na sessão: basta alterá-lo, e o commit da transaction grava
+            with self.transaction:
                 oportunidade.titulo = dados.titulo
                 oportunidade.descricao = dados.descricao
                 oportunidade.url_original = dados.url_original
@@ -91,31 +65,23 @@ class OportunidadeService:
                 oportunidade.modalidade_id = dados.modalidade_id
                 oportunidade.categoria_id = dados.categoria_id
 
-        except IntegrityError:
+        except IntegridadeError as erro:
             # As FKs rejeitam modalidade_id ou categoria_id que não existem
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail="modalidade_id ou categoria_id não existe",
-            )
+            raise ReferenciaInvalidaError(
+                "modalidade_id ou categoria_id não existe"
+            ) from erro
 
         return OportunidadeDTOResponse.model_validate(oportunidade)
 
     def deletar(self, oportunidade_id: int) -> None:
-        oportunidade = self.repository.get_by_id(oportunidade_id)
-
-        if oportunidade is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Oportunidade não encontrada",
-            )
+        oportunidade = self.transaction.oportunidades.get_or_raise(oportunidade_id)
 
         try:
-            with self.uow:
-                self.repository.delete(oportunidade)
+            with self.transaction:
+                self.transaction.oportunidades.delete(oportunidade)
 
-        except IntegrityError:
+        except IntegridadeError as erro:
             # A FK de favoritos.oportunidade_id impede apagar uma oportunidade favoritada
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Oportunidade está nos favoritos de algum usuário e não pode ser removida",
-            )
+            raise ConflitoError(
+                "Oportunidade está nos favoritos de algum usuário e não pode ser removida"
+            ) from erro
