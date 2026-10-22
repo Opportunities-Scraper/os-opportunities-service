@@ -16,3 +16,9 @@ wheels/
 # cache
 __pycache__/
 .ruff_cache/
+
+
+
+# MDs
+ex1.md
+ex2.md
