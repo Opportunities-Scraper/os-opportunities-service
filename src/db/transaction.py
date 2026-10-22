@@ -38,7 +38,7 @@ class Transaction:
         return self
 
 
-    def __exit__(self, exception: BaseException | None, exception_type: type[BaseException] | None, tb: TracebackType | None) -> None:
+    def __exit__(self, exception_type: type[BaseException] | None, exception: BaseException | None, traceback_type: TracebackType | None) -> None:
 
         if exception_type is not None:
             self.session.rollback()
@@ -53,7 +53,7 @@ class Transaction:
 
         except IntegrityError as erro:
             self.session.rollback()
-            
+
             raise IntegridadeError("A operação viola uma restrição do banco") from erro
         
         except Exception:
