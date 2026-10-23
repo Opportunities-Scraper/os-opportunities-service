@@ -9,9 +9,13 @@ from modules.repository import BaseRepository
 class FavoritosRepository(BaseRepository[Favoritos]):
     model = Favoritos
 
+    def get_favorito(self, usuario_id: int, oportunidade_id: int) -> Favoritos | None:
+        # Chave primária composta: session.get recebe os valores na ordem das colunas
+        return self.session.get(Favoritos, (usuario_id, oportunidade_id))
+
     # Equivalente ao get_or_raise da base, para a chave composta
     def get_favorito_or_raise(self, usuario_id: int, oportunidade_id: int) -> Favoritos:
-        favorito = self.session.get(Favoritos, (usuario_id, oportunidade_id))
+        favorito = self.get_favorito(usuario_id, oportunidade_id)
         if favorito is None:
             raise NaoEncontradoError("Oportunidade não está nos favoritos")
         return favorito

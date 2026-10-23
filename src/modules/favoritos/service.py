@@ -10,7 +10,7 @@ class FavoritosService:
 
     def listar(self, usuario_id: int) -> list[FavoritosDTOResponse]:
         favoritos = self.transaction.favoritos.get_usuario_oportunidade(usuario_id)
-        return list(FavoritosDTOResponse.model_validate(f) for f in favoritos)
+        return [FavoritosDTOResponse.model_validate(f) for f in favoritos]
 
     def buscar_relacao(self, usuario_id: int, oportunidade_id: int) -> FavoritosDTOResponse:
         favorito = self.transaction.favoritos.get_favorito_or_raise(usuario_id, oportunidade_id)
