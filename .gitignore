@@ -1,4 +1,4 @@
-# Python-generated files
+# Arquivos gerados pelo Python
 __pycache__/
 *.py[oc]
 build/
@@ -6,22 +6,32 @@ dist/
 wheels/
 *.egg-info
 
-# Virtual environments
+# Ambiente virtual
 .venv
 
-
-# dotenv 
+# Variáveis de ambiente (podem ter senhas). Um .env.example sem segredos pode ser versionado.
 .env
+.env.*
+!.env.example
 
-# cache
-__pycache__/
+# Cache de ferramentas (ruff, pytest, mypy, cobertura de testes)
 .ruff_cache/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Banco SQLite de desenvolvimento, inclusive os arquivos temporários que ele cria ao lado
+/scripts/exemplos/
+*.sqlite
+*.sqlite3
+*.db
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# Arquivos de sistema operacional e editores
+.DS_Store
+.idea/
 
 
-# MDs
-exemplos
-ex1.md
-ex2.md
-
-# Mock banco de dados
-mock.sqlite
