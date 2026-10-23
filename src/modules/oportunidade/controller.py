@@ -9,8 +9,8 @@ from modules.oportunidade.service import OportunidadeService
 router = APIRouter(prefix="/oportunidade", tags=["Oportunidade"])
 
 
-def get_oportunidade_service(uow: Annotated[Transaction, Depends(get_transaction)]) -> OportunidadeService:
-    return OportunidadeService(uow)
+def get_oportunidade_service(transaction: Annotated[Transaction, Depends(get_transaction)]) -> OportunidadeService:
+    return OportunidadeService(transaction)
 
 
 ServiceMap = Annotated[OportunidadeService, Depends(get_oportunidade_service)]

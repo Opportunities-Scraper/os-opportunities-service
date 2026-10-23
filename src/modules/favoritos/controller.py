@@ -10,8 +10,8 @@ from modules.favoritos.service import FavoritosService
 router = APIRouter(prefix="/favoritos", tags=["Favoritos"])
 
 
-def get_favoritos_service(uow: Annotated[Transaction, Depends(get_transaction)]) -> FavoritosService:
-    return FavoritosService(uow)
+def get_favoritos_service(transaction: Annotated[Transaction, Depends(get_transaction)]) -> FavoritosService:
+    return FavoritosService(transaction)
 
 
 ServiceMap = Annotated[FavoritosService, Depends(get_favoritos_service)]

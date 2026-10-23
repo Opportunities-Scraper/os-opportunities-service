@@ -9,8 +9,8 @@ from modules.modalidade.service import ModalidadeService
 router = APIRouter(prefix="/modalidade", tags=["Modalidade"])
 
 
-def get_modalidade_service(uow: Annotated[Transaction, Depends(get_transaction)]) -> ModalidadeService:
-    return ModalidadeService(uow)
+def get_modalidade_service(transaction: Annotated[Transaction, Depends(get_transaction)]) -> ModalidadeService:
+    return ModalidadeService(transaction)
 
 
 ServiceMap = Annotated[ModalidadeService, Depends(get_modalidade_service)]

@@ -9,8 +9,8 @@ from modules.categoria.service import CategoriaService
 router = APIRouter(prefix="/categoria", tags=["Categoria"])
 
 
-def get_categoria_service(uow: Annotated[Transaction, Depends(get_transaction)]) -> CategoriaService:
-    return CategoriaService(uow)
+def get_categoria_service(transaction: Annotated[Transaction, Depends(get_transaction)]) -> CategoriaService:
+    return CategoriaService(transaction)
 
 
 ServiceMap = Annotated[CategoriaService, Depends(get_categoria_service)]
