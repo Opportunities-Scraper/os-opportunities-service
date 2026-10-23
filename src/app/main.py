@@ -1,6 +1,10 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
+from db.schema import handle_db_schema
+from modules.categoria.controller import router as categoria_router
 from modules.exceptions import (
     ConflitoError,
     DomainError,
@@ -8,24 +12,15 @@ from modules.exceptions import (
     NaoEncontradoError,
     ReferenciaInvalidaError,
 )
-
-from contextlib import asynccontextmanager
-from db.database import Base, engine
-
-from modules.modalidade.controller import router as modalidade_router
-from modules.categoria.controller import router as categoria_router
 from modules.favoritos.controller import router as favoritos_router
+from modules.modalidade.controller import router as modalidade_router
 from modules.oportunidade.controller import router as oportunidade_router
-
-
-
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # No MySQL o schema já existe e é mantido fora deste serviço
-    if engine.dialect.name == "sqlite":
-        Base.metadata.create_all(engine)
+    # SQLite ou banco local: cria as tabelas. Banco compartilhado: só confere se existem.
+    handle_db_schema()
     yield
 
 

@@ -15,8 +15,11 @@ from pathlib import Path
 # Permite importar os módulos de src/ sem precisar configurar o PYTHONPATH
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
+from config.settings import settings
+
 from db.database import Base, SessionLocal, engine
 from db.transaction import Transaction
+
 from modules.categoria.dto import CategoriaDTORequest
 from modules.categoria.service import CategoriaService
 from modules.exceptions import ConflitoError
@@ -178,10 +181,12 @@ def garantir_oportunidade(
 
 
 def preparar_banco(resetar: bool) -> None:
-    if engine.dialect.name != "sqlite":
+    # Protege o banco compartilhado: só popula SQLite ou um MySQL marcado com BANCO_LOCAL=true
+    if not (engine.dialect.name == "sqlite" or settings.banco_loca):
         sys.exit(
-            f"Abortado: DATABASE_URL aponta para '{engine.dialect.name}'. "
-            "Este script só popula o banco SQLite de desenvolvimento."
+            f"Abortado: DATABASE_URL aponta para um banco '{engine.dialect.name}' que não está "
+            "marcado como local. Para popular um MySQL descartável (ex.: no Docker), "
+            "defina BANCO_LOCAL=true no .env."
         )
 
     if resetar:
