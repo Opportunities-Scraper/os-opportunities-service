@@ -29,6 +29,9 @@ async def lifespan(app: FastAPI):
     yield
 
 
+
+# uv run uvicorn app.main:app --app-dir src --reload
+
 app = FastAPI(title="Opportunities Service", lifespan=lifespan) 
 
 for router in (categoria_router, modalidade_router, oportunidade_router, favoritos_router):
