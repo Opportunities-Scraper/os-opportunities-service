@@ -37,7 +37,7 @@ class FavoritosService:
 
         return FavoritosDTOResponse.model_validate(favorito)
 
-    def remover(self, usuario_id: int, oportunidade_id: int) -> None:
+    def deletar(self, usuario_id: int, oportunidade_id: int) -> None:
         favorito = self.transaction.favoritos.get_favorito_or_raise(usuario_id, oportunidade_id)
 
         with self.transaction:

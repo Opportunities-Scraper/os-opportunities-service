@@ -36,4 +36,4 @@ def adicionar_favorito(dados: FavoritosDTORequest, usuario_id: UsuarioId, servic
 
 @router.delete("/{oportunidade_id}", status_code=status.HTTP_204_NO_CONTENT)
 def remover_favorito(oportunidade_id: OportunidadeId, usuario_id: UsuarioId, service: ServiceMap):
-    service.remover(usuario_id, oportunidade_id)
+    service.deletar(usuario_id, oportunidade_id)
