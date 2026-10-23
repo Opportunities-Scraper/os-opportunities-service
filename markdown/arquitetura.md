@@ -272,11 +272,12 @@ As decisões deste projeto, no formato do livro:
 - **Decisão:** O `usuario_id` vem do header `usuario-id`, lido em um único ponto: [auth/dependencies.py](src/auth/dependencies.py).
 - **Consequências:** (+) A troca futura afeta só esse arquivo. (−) Qualquer cliente pode se passar por outro usuário. **Não pode ir para produção assim.**
 
-### ADR 7. SQLite para desenvolvimento local
+### ADR 7. SQLite e MySQL local para desenvolvimento
 - **Status:** Accepted
-- **Contexto:** Testar sem depender do MySQL compartilhado.
-- **Decisão:** Trocar a `DATABASE_URL`; com SQLite, ligar as FKs (`PRAGMA foreign_keys=ON`) e criar as tabelas no `lifespan`.
-- **Consequências:** (+) Ciclo de desenvolvimento rápido; o [seed](scripts/seed.py) popula dados de exemplo. (−) Diferenças de comportamento: o SQLite compara texto de forma exata, enquanto o MySQL ignora maiúsculas e acentos.
+- **Contexto:** Testar sem depender do MySQL compartilhado, e também testar no mesmo banco de produção (MySQL no Docker) antes de publicar.
+- **Decisão:** A `DATABASE_URL` escolhe o banco e é validada ao iniciar (só `sqlite://` ou `mysql+pymysql://`). No SQLite, as FKs são ligadas (`PRAGMA foreign_keys=ON`). As tabelas são criadas no `lifespan` só em bancos locais: SQLite sempre, MySQL apenas com `BANCO_LOCAL=true`. Num MySQL não marcado, a API só confere se o schema existe e não sobe se faltar tabela.
+- **Consequências:** (+) Ciclo rápido com SQLite e teste fiel com MySQL; o seed popula ambos; o banco compartilhado nunca é alterado por acidente. (−) Diferenças entre os bancos: o SQLite compara texto de forma exata, enquanto o MySQL ignora maiúsculas e acentos.
+- **Compliance:** Sem `BANCO_LOCAL`, um MySQL sem tabelas faz a API falhar na inicialização, com a lista das tabelas ausentes.
 
 ---
 

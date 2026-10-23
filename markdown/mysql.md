@@ -109,7 +109,10 @@ No `.env` da raiz do projeto:
 
 ```env
 DATABASE_URL=mysql+pymysql://app:troque-esta-senha-app@127.0.0.1:3307/opportunities_service
+BANCO_LOCAL=true
 ```
+
+O `.env.example` na raiz traz as duas opções (SQLite e MySQL) prontas para copiar.
 
 | Parte | Significado |
 |---|---|
@@ -124,14 +127,25 @@ Se a senha tiver caracteres especiais (`@`, `:`, `/`, `#`), eles precisam ser co
 
 ## Particularidades deste projeto
 
-**1. O banco nasce vazio, e a aplicação não cria as tabelas no MySQL.**
-O `lifespan` do [main.py](src/app/main.py) só roda o `create_all` quando o banco é SQLite. Isso é proposital: no servidor real, o schema já existe e é mantido fora deste serviço. Num MySQL novo no Docker, as requisições vão falhar com "Table doesn't exist" até as tabelas serem criadas. Há três caminhos:
-- rodar o script SQL do schema (exportado do MySQL Workbench) dentro do container;
-- colocar esse script em `/docker-entrypoint-initdb.d/` com um volume; a imagem oficial executa automaticamente os `.sql` dessa pasta **na primeira inicialização**;
-- configurar o Alembic (já instalado no projeto) para criar e versionar o schema.
+**1. `BANCO_LOCAL=true`: o que muda.**
+O banco do container nasce vazio. Ao subir, a aplicação decide o que fazer com o schema (em `src/db/schema.py`):
 
-**2. O `seed.py` não popula o MySQL.**
-O [scripts/seed.py](scripts/seed.py) recusa de propósito qualquer banco que não seja SQLite, para nunca colocar dados falsos no banco compartilhado. Para um MySQL **local**, essa trava em `preparar_banco` é o único ponto a ajustar.
+| Banco | `BANCO_LOCAL` | Ao subir a API |
+|---|---|---|
+| SQLite | (não precisa) | Cria as tabelas que faltam |
+| MySQL | `true` | Cria as tabelas que faltam |
+| MySQL | ausente ou `false` | **Não cria nada**; só confere se as tabelas existem. Se faltar alguma, não sobe e mostra uma mensagem dizendo quais faltam. |
+
+O padrão é **não** criar tabelas no MySQL de propósito: no servidor compartilhado, o schema já existe e é mantido fora deste serviço. Por isso, só ative o `BANCO_LOCAL` num MySQL **seu e descartável**, como o do Docker. O `create_all` apenas cria tabelas ausentes; ele nunca altera nem apaga as que já existem.
+
+**2. O `seed.py` segue a mesma regra.**
+O `scripts/seed.py` popula o SQLite sempre, e o MySQL só com `BANCO_LOCAL=true`. Sem a marcação, ele aborta, para nunca colocar dados falsos no banco compartilhado. Atenção: o `--reset` **apaga as quatro tabelas** antes de recriá-las.
+
+```bash
+uv run python scripts/seed.py --reset    # com DATABASE_URL do MySQL e BANCO_LOCAL=true
+```
+
+**A `DATABASE_URL` é validada ao iniciar.** Só são aceitos `sqlite://` e `mysql+pymysql://`. Um erro comum é escrever `mysql://`: o SQLAlchemy procuraria outro driver (MySQLdb), que não está instalado, e daria um erro confuso. A aplicação recusa e indica o prefixo certo.
 
 **3. O MySQL compara textos de forma diferente do SQLite.**
 O MySQL 8 usa por padrão a collation `utf8mb4_0900_ai_ci`, que **ignora acentos e maiúsculas**: `'Estágio' = 'estagio'` é verdadeiro. No SQLite, a comparação é exata. Na prática, criar a categoria "estagio" com "Estágio" já cadastrada dá **409 no MySQL**, mas é aceito no SQLite. É um bom motivo para testar no MySQL antes de publicar.
