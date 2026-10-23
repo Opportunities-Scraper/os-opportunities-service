@@ -13,8 +13,9 @@ class Settings(BaseSettings):
 
     # Marca o banco como local e descartável (ex.: MySQL no Docker): a API cria as tabelas
     # que faltam e o seed pode populá-lo. O SQLite é sempre tratado como local.
-    # Nunca ative apontando para o banco compartilhado.
+    # Nunca ative apontando para o banco compartilhado: ligue com BANCO_LOCAL=true no .env.
     banco_local: bool = False
+
 
     @field_validator("database_url")
     @classmethod

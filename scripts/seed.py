@@ -182,7 +182,7 @@ def garantir_oportunidade(
 
 def preparar_banco(resetar: bool) -> None:
     # Protege o banco compartilhado: só popula SQLite ou um MySQL marcado com BANCO_LOCAL=true
-    if not (engine.dialect.name == "sqlite" or settings.banco_loca):
+    if not (engine.dialect.name == "sqlite" or settings.banco_local):
         sys.exit(
             f"Abortado: DATABASE_URL aponta para um banco '{engine.dialect.name}' que não está "
             "marcado como local. Para popular um MySQL descartável (ex.: no Docker), "
