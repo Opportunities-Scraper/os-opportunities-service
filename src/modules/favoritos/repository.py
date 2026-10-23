@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import joinedload
 
 from modules.exceptions import NaoEncontradoError
@@ -31,4 +31,11 @@ class FavoritosRepository(BaseRepository[Favoritos]):
                 .order_by(Favoritos.data_criacao.desc())
             )
         )
+
+    def delete_by_oportunidade(self, oportunidade_id: int) -> None:
+        # Um único DELETE para os favoritos de todos os usuários, em vez de um por favorito
+        self.session.execute(
+            delete(Favoritos).where(Favoritos.oportunidade_id == oportunidade_id)
+        )
+        self.session.flush()
 

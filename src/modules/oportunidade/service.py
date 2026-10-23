@@ -76,12 +76,10 @@ class OportunidadeService:
     def deletar(self, oportunidade_id: int) -> None:
         oportunidade = self.transaction.oportunidades.get_or_raise(oportunidade_id)
 
-        try:
-            with self.transaction:
-                self.transaction.oportunidades.delete(oportunidade)
+        # Apagar a oportunidade remove também os favoritos que apontam para ela. Os dois
+        # passos ficam na mesma transação: se o segundo falhar, os favoritos voltam.
+        with self.transaction:
+            self.transaction.favoritos.delete_by_oportunidade(oportunidade_id)
+            self.transaction.oportunidades.delete(oportunidade)
 
-        except IntegridadeError as erro:
-            # A FK de favoritos.oportunidade_id impede apagar uma oportunidade favoritada
-            raise ConflitoError(
-                "Oportunidade está nos favoritos de algum usuário e não pode ser removida"
-            ) from erro
+
