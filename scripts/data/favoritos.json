@@ -1,0 +1,80 @@
+{
+  "como_usar": "Rode `uv run python scripts/seed.py --reset` e execute os casos na ordem. O usuário vem do header 'usuario-id' (autenticação provisória). 'corpo' de resposta_esperada lista só os campos conferidos; 'quantidade' é o tamanho esperado de uma lista.",
+  "casos": [
+    {
+      "descricao": "Listar favoritos do usuário 1 (o seed cria 3)",
+      "requisicao": { "metodo": "GET", "rota": "/favoritos", "headers": { "usuario-id": "1" } },
+      "resposta_esperada": { "status": 200, "quantidade": 3 }
+    },
+    {
+      "descricao": "Listar favoritos do usuário 2 (o seed cria 2)",
+      "requisicao": { "metodo": "GET", "rota": "/favoritos", "headers": { "usuario-id": "2" } },
+      "resposta_esperada": { "status": 200, "quantidade": 2 }
+    },
+    {
+      "descricao": "Usuário sem favoritos recebe lista vazia",
+      "requisicao": { "metodo": "GET", "rota": "/favoritos", "headers": { "usuario-id": "3" } },
+      "resposta_esperada": { "status": 200, "quantidade": 0 }
+    },
+    {
+      "descricao": "Requisição sem o header de usuário",
+      "requisicao": { "metodo": "GET", "rota": "/favoritos" },
+      "resposta_esperada": { "status": 422 }
+    },
+    {
+      "descricao": "Header de usuário inválido (precisa ser maior que zero)",
+      "requisicao": { "metodo": "GET", "rota": "/favoritos", "headers": { "usuario-id": "0" } },
+      "resposta_esperada": { "status": 422 }
+    },
+    {
+      "descricao": "Verificar se a oportunidade 1 está nos favoritos do usuário 1",
+      "requisicao": { "metodo": "GET", "rota": "/favoritos/1", "headers": { "usuario-id": "1" } },
+      "resposta_esperada": { "status": 200, "corpo": { "usuario_id": 1, "oportunidade_id": 1 } }
+    },
+    {
+      "descricao": "Oportunidade que não está nos favoritos do usuário",
+      "requisicao": { "metodo": "GET", "rota": "/favoritos/2", "headers": { "usuario-id": "1" } },
+      "resposta_esperada": { "status": 404, "corpo": { "detail": "Oportunidade não está nos favoritos" } }
+    },
+    {
+      "descricao": "Favoritar uma oportunidade",
+      "requisicao": { "metodo": "POST", "rota": "/favoritos", "headers": { "usuario-id": "1" }, "corpo": { "oportunidade_id": 2 } },
+      "resposta_esperada": { "status": 201, "corpo": { "usuario_id": 1, "oportunidade_id": 2 } }
+    },
+    {
+      "descricao": "Favoritar de novo a mesma oportunidade",
+      "requisicao": { "metodo": "POST", "rota": "/favoritos", "headers": { "usuario-id": "1" }, "corpo": { "oportunidade_id": 2 } },
+      "resposta_esperada": { "status": 409, "corpo": { "detail": "Oportunidade já está nos favoritos" } }
+    },
+    {
+      "descricao": "Favoritar oportunidade inexistente",
+      "requisicao": { "metodo": "POST", "rota": "/favoritos", "headers": { "usuario-id": "1" }, "corpo": { "oportunidade_id": 999 } },
+      "resposta_esperada": { "status": 404, "corpo": { "detail": "Oportunidade não encontrada" } }
+    },
+    {
+      "descricao": "Tentar favoritar em nome de outro usuário pelo corpo (usuario_id não é aceito)",
+      "requisicao": { "metodo": "POST", "rota": "/favoritos", "headers": { "usuario-id": "1" }, "corpo": { "oportunidade_id": 3, "usuario_id": 2 } },
+      "resposta_esperada": { "status": 422 }
+    },
+    {
+      "descricao": "Agora o usuário 1 tem 4 favoritos",
+      "requisicao": { "metodo": "GET", "rota": "/favoritos", "headers": { "usuario-id": "1" } },
+      "resposta_esperada": { "status": 200, "quantidade": 4 }
+    },
+    {
+      "descricao": "Remover o favorito adicionado",
+      "requisicao": { "metodo": "DELETE", "rota": "/favoritos/2", "headers": { "usuario-id": "1" } },
+      "resposta_esperada": { "status": 204 }
+    },
+    {
+      "descricao": "Remover de novo o mesmo favorito",
+      "requisicao": { "metodo": "DELETE", "rota": "/favoritos/2", "headers": { "usuario-id": "1" } },
+      "resposta_esperada": { "status": 404, "corpo": { "detail": "Oportunidade não está nos favoritos" } }
+    },
+    {
+      "descricao": "Um usuário não consegue remover favorito de outro",
+      "requisicao": { "metodo": "DELETE", "rota": "/favoritos/7", "headers": { "usuario-id": "1" } },
+      "resposta_esperada": { "status": 404, "corpo": { "detail": "Oportunidade não está nos favoritos" } }
+    }
+  ]
+}

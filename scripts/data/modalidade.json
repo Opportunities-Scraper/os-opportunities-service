@@ -1,0 +1,60 @@
+{
+  "como_usar": "Rode `uv run python scripts/seed.py --reset` e execute os casos na ordem. 'corpo' de resposta_esperada lista só os campos conferidos; 'quantidade' é o tamanho esperado de uma lista.",
+  "casos": [
+    {
+      "descricao": "Listar todas as modalidades do seed",
+      "requisicao": { "metodo": "GET", "rota": "/modalidade" },
+      "resposta_esperada": { "status": 200, "quantidade": 3 }
+    },
+    {
+      "descricao": "Buscar modalidade existente por id",
+      "requisicao": { "metodo": "GET", "rota": "/modalidade/1" },
+      "resposta_esperada": { "status": 200, "corpo": { "modalidade_id": 1, "titulo": "Remoto" } }
+    },
+    {
+      "descricao": "Buscar id inexistente",
+      "requisicao": { "metodo": "GET", "rota": "/modalidade/999" },
+      "resposta_esperada": { "status": 404, "corpo": { "detail": "Modalidade não encontrada" } }
+    },
+    {
+      "descricao": "Buscar por título existente",
+      "requisicao": { "metodo": "GET", "rota": "/modalidade/titulo/Híbrido" },
+      "resposta_esperada": { "status": 200, "corpo": { "modalidade_id": 3, "titulo": "Híbrido" } }
+    },
+    {
+      "descricao": "Criar modalidade",
+      "requisicao": { "metodo": "POST", "rota": "/modalidade", "corpo": { "titulo": "Remoto internacional" } },
+      "resposta_esperada": { "status": 201, "corpo": { "modalidade_id": 4, "titulo": "Remoto internacional" } }
+    },
+    {
+      "descricao": "Criar modalidade com título já existente",
+      "requisicao": { "metodo": "POST", "rota": "/modalidade", "corpo": { "titulo": "Remoto" } },
+      "resposta_esperada": { "status": 409, "corpo": { "detail": "Já existe uma modalidade com esse título" } }
+    },
+    {
+      "descricao": "Corpo sem o campo obrigatório",
+      "requisicao": { "metodo": "POST", "rota": "/modalidade", "corpo": {} },
+      "resposta_esperada": { "status": 422 }
+    },
+    {
+      "descricao": "Atualizar a modalidade criada",
+      "requisicao": { "metodo": "PUT", "rota": "/modalidade/4", "corpo": { "titulo": "Remoto (fuso europeu)" } },
+      "resposta_esperada": { "status": 200, "corpo": { "modalidade_id": 4, "titulo": "Remoto (fuso europeu)" } }
+    },
+    {
+      "descricao": "Atualizar para o título de outra modalidade",
+      "requisicao": { "metodo": "PUT", "rota": "/modalidade/4", "corpo": { "titulo": "Presencial" } },
+      "resposta_esperada": { "status": 409, "corpo": { "detail": "Já existe uma modalidade com esse título" } }
+    },
+    {
+      "descricao": "Apagar modalidade usada por oportunidades",
+      "requisicao": { "metodo": "DELETE", "rota": "/modalidade/2" },
+      "resposta_esperada": { "status": 409, "corpo": { "detail": "Modalidade possui oportunidades vinculadas e não pode ser removida" } }
+    },
+    {
+      "descricao": "Apagar a modalidade criada",
+      "requisicao": { "metodo": "DELETE", "rota": "/modalidade/4" },
+      "resposta_esperada": { "status": 204 }
+    }
+  ]
+}

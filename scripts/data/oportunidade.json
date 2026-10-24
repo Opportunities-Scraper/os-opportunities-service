@@ -1,0 +1,263 @@
+{
+  "como_usar": "Rode `uv run python scripts/seed.py --reset` e execute os casos na ordem. 'corpo' de resposta_esperada lista só os campos conferidos; 'quantidade' é o tamanho esperado de uma lista.",
+  "casos": [
+    {
+      "descricao": "Listar todas as oportunidades do seed",
+      "requisicao": { "metodo": "GET", "rota": "/oportunidade" },
+      "resposta_esperada": { "status": 200, "quantidade": 9 }
+    },
+    {
+      "descricao": "Buscar oportunidade existente por id",
+      "requisicao": { "metodo": "GET", "rota": "/oportunidade/1" },
+      "resposta_esperada": {
+        "status": 200,
+        "corpo": { "oportunidade_id": 1, "titulo": "Estágio em Desenvolvimento Back-end", "categoria_id": 1, "modalidade_id": 1 }
+      }
+    },
+    {
+      "descricao": "Buscar id inexistente",
+      "requisicao": { "metodo": "GET", "rota": "/oportunidade/999" },
+      "resposta_esperada": { "status": 404, "corpo": { "detail": "Oportunidade não encontrada" } }
+    },
+    {
+      "descricao": "Filtrar por modalidade (1 = Remoto)",
+      "requisicao": { "metodo": "GET", "rota": "/oportunidade/modalidade/1" },
+      "resposta_esperada": { "status": 200, "quantidade": 4 }
+    },
+    {
+      "descricao": "Filtrar por categoria (1 = Estágio)",
+      "requisicao": { "metodo": "GET", "rota": "/oportunidade/categoria/1" },
+      "resposta_esperada": { "status": 200, "quantidade": 3 }
+    },
+    {
+      "descricao": "Filtro sem resultados devolve lista vazia, não 404",
+      "requisicao": { "metodo": "GET", "rota": "/oportunidade/categoria/999" },
+      "resposta_esperada": { "status": 200, "quantidade": 0 }
+    },
+    {
+      "descricao": "Criar oportunidade (a data com fuso -03:00 é gravada convertida para UTC)",
+      "requisicao": {
+        "metodo": "POST",
+        "rota": "/oportunidade",
+        "corpo": {
+          "titulo": "Estágio em Desenvolvimento Mobile",
+          "descricao": "Desenvolvimento de aplicativos com Flutter.",
+          "url_original": "https://vagas.example.com/estagio-mobile",
+          "pais": "BR",
+          "cidade": "Fortaleza",
+          "data_publicacao": "2026-10-20T09:00:00-03:00",
+          "data_limite": "2026-12-20T18:00:00-03:00",
+          "modalidade_id": 3,
+          "categoria_id": 1
+        }
+      },
+      "resposta_esperada": {
+        "status": 201,
+        "corpo": { "oportunidade_id": 10, "data_publicacao": "2026-10-20T12:00:00", "data_limite": "2026-12-20T21:00:00" }
+      }
+    },
+    {
+      "descricao": "Criar com URL já cadastrada",
+      "requisicao": {
+        "metodo": "POST",
+        "rota": "/oportunidade",
+        "corpo": {
+          "titulo": "Outra vaga, mesma URL",
+          "descricao": "A URL identifica a vaga, então isto é duplicata.",
+          "url_original": "https://vagas.example.com/estagio-mobile",
+          "pais": "BR",
+          "cidade": "Fortaleza",
+          "data_publicacao": "2026-10-20T09:00:00",
+          "data_limite": "2026-12-20T18:00:00",
+          "modalidade_id": 3,
+          "categoria_id": 1
+        }
+      },
+      "resposta_esperada": { "status": 409, "corpo": { "detail": "Já existe uma oportunidade com essa URL" } }
+    },
+    {
+      "descricao": "Criar com categoria inexistente (rejeitado pela FK)",
+      "requisicao": {
+        "metodo": "POST",
+        "rota": "/oportunidade",
+        "corpo": {
+          "titulo": "Vaga com categoria inválida",
+          "descricao": "categoria_id aponta para algo que não existe.",
+          "url_original": "https://vagas.example.com/categoria-invalida",
+          "pais": "BR",
+          "cidade": "Natal",
+          "data_publicacao": "2026-10-20T09:00:00",
+          "data_limite": "2026-12-20T18:00:00",
+          "modalidade_id": 1,
+          "categoria_id": 999
+        }
+      },
+      "resposta_esperada": { "status": 422, "corpo": { "detail": "modalidade_id ou categoria_id não existe" } }
+    },
+    {
+      "descricao": "URL em formato inválido",
+      "requisicao": {
+        "metodo": "POST",
+        "rota": "/oportunidade",
+        "corpo": {
+          "titulo": "Vaga com URL inválida",
+          "descricao": "Falta o esquema http(s)://",
+          "url_original": "vagas.example.com/sem-esquema",
+          "pais": "BR",
+          "cidade": "Natal",
+          "data_publicacao": "2026-10-20T09:00:00",
+          "data_limite": "2026-12-20T18:00:00",
+          "modalidade_id": 1,
+          "categoria_id": 1
+        }
+      },
+      "resposta_esperada": { "status": 422 }
+    },
+    {
+      "descricao": "data_limite anterior a data_publicacao",
+      "requisicao": {
+        "metodo": "POST",
+        "rota": "/oportunidade",
+        "corpo": {
+          "titulo": "Vaga com datas invertidas",
+          "descricao": "O validador do DTO rejeita.",
+          "url_original": "https://vagas.example.com/datas-invertidas",
+          "pais": "BR",
+          "cidade": "Natal",
+          "data_publicacao": "2026-12-20T09:00:00",
+          "data_limite": "2026-10-20T18:00:00",
+          "modalidade_id": 1,
+          "categoria_id": 1
+        }
+      },
+      "resposta_esperada": { "status": 422 }
+    },
+    {
+      "descricao": "Corpo sem campo obrigatório (descricao)",
+      "requisicao": {
+        "metodo": "POST",
+        "rota": "/oportunidade",
+        "corpo": {
+          "titulo": "Vaga incompleta",
+          "url_original": "https://vagas.example.com/incompleta",
+          "pais": "BR",
+          "cidade": "Natal",
+          "data_publicacao": "2026-10-20T09:00:00",
+          "data_limite": "2026-12-20T18:00:00",
+          "modalidade_id": 1,
+          "categoria_id": 1
+        }
+      },
+      "resposta_esperada": { "status": 422 }
+    },
+    {
+      "descricao": "Atualizar a oportunidade criada (PUT exige todos os campos)",
+      "requisicao": {
+        "metodo": "PUT",
+        "rota": "/oportunidade/10",
+        "corpo": {
+          "titulo": "Estágio em Desenvolvimento Mobile (Flutter)",
+          "descricao": "Desenvolvimento de aplicativos com Flutter e Firebase.",
+          "url_original": "https://vagas.example.com/estagio-mobile",
+          "pais": "BR",
+          "cidade": "Fortaleza",
+          "data_publicacao": "2026-10-20T12:00:00",
+          "data_limite": "2027-01-15T21:00:00",
+          "modalidade_id": 1,
+          "categoria_id": 1
+        }
+      },
+      "resposta_esperada": {
+        "status": 200,
+        "corpo": { "oportunidade_id": 10, "titulo": "Estágio em Desenvolvimento Mobile (Flutter)", "modalidade_id": 1, "data_limite": "2027-01-15T21:00:00" }
+      }
+    },
+    {
+      "descricao": "Atualizar usando a URL de outra oportunidade",
+      "requisicao": {
+        "metodo": "PUT",
+        "rota": "/oportunidade/10",
+        "corpo": {
+          "titulo": "Estágio em Desenvolvimento Mobile (Flutter)",
+          "descricao": "Tentando roubar a URL da oportunidade 1.",
+          "url_original": "https://vagas.example.com/estagio-backend",
+          "pais": "BR",
+          "cidade": "Fortaleza",
+          "data_publicacao": "2026-10-20T12:00:00",
+          "data_limite": "2027-01-15T21:00:00",
+          "modalidade_id": 1,
+          "categoria_id": 1
+        }
+      },
+      "resposta_esperada": { "status": 409, "corpo": { "detail": "Já existe uma oportunidade com essa URL" } }
+    },
+    {
+      "descricao": "Atualizar com modalidade inexistente",
+      "requisicao": {
+        "metodo": "PUT",
+        "rota": "/oportunidade/10",
+        "corpo": {
+          "titulo": "Estágio em Desenvolvimento Mobile (Flutter)",
+          "descricao": "modalidade_id aponta para algo que não existe.",
+          "url_original": "https://vagas.example.com/estagio-mobile",
+          "pais": "BR",
+          "cidade": "Fortaleza",
+          "data_publicacao": "2026-10-20T12:00:00",
+          "data_limite": "2027-01-15T21:00:00",
+          "modalidade_id": 999,
+          "categoria_id": 1
+        }
+      },
+      "resposta_esperada": { "status": 422, "corpo": { "detail": "modalidade_id ou categoria_id não existe" } }
+    },
+    {
+      "descricao": "Atualizar id inexistente",
+      "requisicao": {
+        "metodo": "PUT",
+        "rota": "/oportunidade/999",
+        "corpo": {
+          "titulo": "Não existe",
+          "descricao": "Não existe.",
+          "url_original": "https://vagas.example.com/nao-existe",
+          "pais": "BR",
+          "cidade": "Natal",
+          "data_publicacao": "2026-10-20T09:00:00",
+          "data_limite": "2026-12-20T18:00:00",
+          "modalidade_id": 1,
+          "categoria_id": 1
+        }
+      },
+      "resposta_esperada": { "status": 404, "corpo": { "detail": "Oportunidade não encontrada" } }
+    },
+    {
+      "descricao": "Usuário 3 favorita a oportunidade criada",
+      "requisicao": { "metodo": "POST", "rota": "/favoritos", "headers": { "usuario-id": "3" }, "corpo": { "oportunidade_id": 10 } },
+      "resposta_esperada": { "status": 201, "corpo": { "usuario_id": 3, "oportunidade_id": 10 } }
+    },
+    {
+      "descricao": "Usuário 4 também favorita a oportunidade criada",
+      "requisicao": { "metodo": "POST", "rota": "/favoritos", "headers": { "usuario-id": "4" }, "corpo": { "oportunidade_id": 10 } },
+      "resposta_esperada": { "status": 201, "corpo": { "usuario_id": 4, "oportunidade_id": 10 } }
+    },
+    {
+      "descricao": "Apagar oportunidade favoritada: os favoritos são apagados junto",
+      "requisicao": { "metodo": "DELETE", "rota": "/oportunidade/10" },
+      "resposta_esperada": { "status": 204 }
+    },
+    {
+      "descricao": "O favorito do usuário 3 foi removido junto com a oportunidade",
+      "requisicao": { "metodo": "GET", "rota": "/favoritos", "headers": { "usuario-id": "3" } },
+      "resposta_esperada": { "status": 200, "quantidade": 0 }
+    },
+    {
+      "descricao": "O favorito do usuário 4 também",
+      "requisicao": { "metodo": "GET", "rota": "/favoritos", "headers": { "usuario-id": "4" } },
+      "resposta_esperada": { "status": 200, "quantidade": 0 }
+    },
+    {
+      "descricao": "Apagar de novo a mesma oportunidade",
+      "requisicao": { "metodo": "DELETE", "rota": "/oportunidade/10" },
+      "resposta_esperada": { "status": 404, "corpo": { "detail": "Oportunidade não encontrada" } }
+    }
+  ]
+}
