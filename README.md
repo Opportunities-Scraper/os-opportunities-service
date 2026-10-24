@@ -23,6 +23,15 @@ Este repositório é **um dos serviços** do sistema e é responsável só pela 
 | `usuario` | ❌ Não | Pertence ao serviço de usuários; aqui aparece só como `usuario_id` |
 | `plano` | ❌ Não | Pertence ao serviço de usuários |
 
+### O que é cada tabela
+
+- **Oportunidade:** é a vaga em si, coletada pelo scraper. Guarda o título, a descrição, o link para a vaga no site de origem (`url_original`), o país e a cidade, a data de publicação e a data limite para se candidatar. Cada oportunidade pertence a uma categoria e a uma modalidade.
+- **Categoria:** refere-se ao tipo ou nível da oportunidade, como estágio, trainee, júnior ou freelance.
+- **Modalidade:** refere-se ao formato de trabalho da oportunidade, seja presencial, remoto, híbrido etc.
+- **Favoritos:** refere-se às oportunidades que cada usuário salvou para ver depois. É a ligação entre um usuário e uma oportunidade, com a data em que foi favoritada. Um usuário pode favoritar várias oportunidades, e uma oportunidade pode ser favoritada por vários usuários.
+- **Usuário** *(outro serviço)*: refere-se à pessoa cadastrada no sistema, com e-mail, nome de usuário, senha (guardada como hash), se a conta está ativa, se é administrador e qual plano possui.
+- **Plano** *(outro serviço)*: refere-se ao tipo de assinatura do usuário.
+
 **Regras de negócio principais:**
 - Não podem existir duas categorias (ou duas modalidades) com o mesmo título.
 - A **URL original** identifica a vaga: duas oportunidades não podem ter a mesma URL. O título pode repetir, porque empresas diferentes publicam vagas com o mesmo nome.
