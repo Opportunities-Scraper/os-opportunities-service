@@ -1,7 +1,7 @@
 from db.transaction import Transaction
 from modules.categoria.dto import CategoriaDTORequest, CategoriaDTOResponse
 from modules.categoria.model import Categoria
-from modules.exceptions import ConflitoError, IntegridadeError, NaoEncontradoError
+from modules.base_exceptions import ConflitoError, IntegridadeError, NaoEncontradoError
 
 
 class CategoriaService:

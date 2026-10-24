@@ -1,5 +1,5 @@
 from db.transaction import Transaction
-from modules.exceptions import ConflitoError, IntegridadeError, NaoEncontradoError
+from modules.base_exceptions import ConflitoError, IntegridadeError, NaoEncontradoError
 from modules.modalidade.dto import ModalidadeDTORequest, ModalidadeDTOResponse
 from modules.modalidade.model import Modalidade
 

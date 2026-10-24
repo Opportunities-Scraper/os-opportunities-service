@@ -1,7 +1,7 @@
 from sqlalchemy import select
 
 from modules.oportunidade.model import Oportunidade
-from modules.repository import BaseRepository
+from modules.base_repository import BaseRepository
 
 
 class OportunidadeRepository(BaseRepository[Oportunidade]):

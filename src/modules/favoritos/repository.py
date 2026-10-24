@@ -1,9 +1,9 @@
 from sqlalchemy import delete, select
 from sqlalchemy.orm import joinedload
 
-from modules.exceptions import NaoEncontradoError
+from modules.base_exceptions import NaoEncontradoError
 from modules.favoritos.model import Favoritos
-from modules.repository import BaseRepository
+from modules.base_repository import BaseRepository
 
 
 class FavoritosRepository(BaseRepository[Favoritos]):

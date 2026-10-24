@@ -22,7 +22,7 @@ from db.transaction import Transaction
 
 from modules.categoria.dto import CategoriaDTORequest
 from modules.categoria.service import CategoriaService
-from modules.exceptions import ConflitoError
+from modules.base_exceptions import ConflitoError
 from modules.favoritos.dto import FavoritosDTORequest
 from modules.favoritos.service import FavoritosService
 from modules.modalidade.dto import ModalidadeDTORequest

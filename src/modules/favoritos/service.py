@@ -1,5 +1,5 @@
 from db.transaction import Transaction
-from modules.exceptions import ConflitoError, IntegridadeError
+from modules.base_exceptions import ConflitoError, IntegridadeError
 from modules.favoritos.dto import FavoritosDTORequest, FavoritosDTOResponse
 from modules.favoritos.model import Favoritos
 

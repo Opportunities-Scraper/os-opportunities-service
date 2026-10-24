@@ -1,7 +1,7 @@
 from sqlalchemy import select
 
 from modules.modalidade.model import Modalidade
-from modules.repository import BaseRepository
+from modules.base_repository import BaseRepository
 
 
 class ModalidadeRepository(BaseRepository[Modalidade]):

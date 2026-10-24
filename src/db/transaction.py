@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from db.database import get_session
 from modules.categoria.repository import CategoriaRepository
-from modules.exceptions import IntegridadeError
+from modules.base_exceptions import IntegridadeError
 from modules.favoritos.repository import FavoritosRepository
 from modules.modalidade.repository import ModalidadeRepository
 from modules.oportunidade.repository import OportunidadeRepository

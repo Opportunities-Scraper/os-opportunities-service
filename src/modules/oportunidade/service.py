@@ -1,5 +1,5 @@
 from db.transaction import Transaction
-from modules.exceptions import ConflitoError, IntegridadeError, ReferenciaInvalidaError
+from modules.base_exceptions import ConflitoError, IntegridadeError, ReferenciaInvalidaError
 from modules.oportunidade.dto import OportunidadeDTORequest, OportunidadeDTOResponse
 from modules.oportunidade.model import Oportunidade
 

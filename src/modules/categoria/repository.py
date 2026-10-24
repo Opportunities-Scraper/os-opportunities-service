@@ -1,7 +1,7 @@
 from sqlalchemy import select
 
 from modules.categoria.model import Categoria
-from modules.repository import BaseRepository
+from modules.base_repository import BaseRepository
 
 
 class CategoriaRepository(BaseRepository[Categoria]):

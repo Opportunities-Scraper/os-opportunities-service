@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 
 from db.schema import handle_db_schema
 from modules.categoria.controller import router as categoria_router
-from modules.exceptions import (
+from modules.base_exceptions import (
     ConflitoError,
     DomainError,
     IntegridadeError,
