@@ -1,33 +1,40 @@
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-# Bancos que o projeto sabe usar, com o prefixo de URL esperado pelo SQLAlchemy
-BANCOS_SUPORTADOS = ("sqlite://", "mysql+pymysql://")
+from sqlalchemy.engine import make_url
+from sqlalchemy.exc import ArgumentError
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    # Ex.: sqlite:///mock.sqlite  ou  mysql+pymysql://usuario:senha@127.0.0.1:3307/banco
+    # Ex.: sqlite:///mock.sqlite  ou  mysql+pymysql://usuario:senha@127.0.0.1:porta/banco
     database_url: str
 
-    # Marca o banco como local e descartável (ex.: MySQL no Docker): a API cria as tabelas
-    # que faltam e o seed pode populá-lo. O SQLite é sempre tratado como local.
-    # Nunca ative apontando para o banco compartilhado: ligue com BANCO_LOCAL=true no .env.
+    # Fleg para identificar se o banco de dados é local ou não
     banco_local: bool = False
-
 
     @field_validator("database_url")
     @classmethod
-    def validar_database_url(cls, url: str) -> str:
-        if url.startswith(BANCOS_SUPORTADOS):
-            return url
+    def validar_database_url(cls, db_url: str) -> str:
+        db_url = db_url.strip()
 
-        # "mysql://" faria o SQLAlchemy procurar o driver MySQLdb, que não está instalado
-        if url.startswith("mysql://"):
+        try:
+            url = make_url(db_url)
+
+        except ArgumentError as exc:
+            raise ValueError(
+                "database_url não é uma URL válida"
+            ) from exc
+
+        if url.drivername == "mysql":
             raise ValueError("use o prefixo 'mysql+pymysql://' em vez de 'mysql://'")
 
-        raise ValueError(f"banco não suportado; a URL deve começar com {' ou '.join(BANCOS_SUPORTADOS)}")
+        if url.drivername not in {"sqlite", "mysql+pymysql"}:
+            raise ValueError("banco não suportado; use SQLite ou MySQL com PyMySQL")
+
+        return db_url
 
 
+
+# Responsável por toda a configuração referente a conexão com banco de dados
 settings = Settings()
