@@ -178,7 +178,13 @@ O `uv sync` baixa o Python 3.13 (se necessário), cria a pasta `.venv` e instala
 
 ## Configurando o banco de dados
 
-A aplicação lê a configuração de um arquivo **`.env`** na raiz do projeto. Ele **não é versionado**, porque pode conter senhas. Crie o seu com uma das duas opções abaixo.
+A aplicação lê a configuração de um arquivo **`.env`** na raiz do projeto. Ele **não é versionado**, porque pode conter senhas. Crie o seu a partir do modelo, que já traz as duas opções comentadas:
+
+```bash
+cp .env.example .env
+```
+
+Depois, deixe ativa apenas uma das opções abaixo.
 
 ### Opção 1: SQLite (mais simples, recomendado para começar)
 
@@ -258,7 +264,7 @@ Depois, acesse:
 
 ```bash
 uv sync
-echo "DATABASE_URL=sqlite:///mock.sqlite" > .env
+cp .env.example .env          # o modelo já vem configurado para SQLite
 uv run python scripts/seed.py
 uv run uvicorn app.main:app --app-dir src --reload
 ```
@@ -268,7 +274,7 @@ uv run uvicorn app.main:app --app-dir src --reload
 | Erro | Causa e solução |
 |---|---|
 | `Address already in use` | Outro processo já usa a porta 8000 (geralmente outro uvicorn esquecido aberto). Encerre-o, ou use `--port 8001`. |
-| `Field required` em `database_url` | O `.env` não existe, ou o comando não foi rodado da raiz do projeto |
+| `Field required` em `database_url` | O `.env` não existe (crie com `cp .env.example .env`), ou o comando não foi rodado da raiz do projeto |
 | `Tabelas ausentes no banco ...` | O MySQL não tem as tabelas. Se for um banco local, adicione `BANCO_LOCAL=true` ao `.env`. |
 | `422` com `"loc": ["header", "usuario-id"]` | Faltou o header `usuario-id` numa rota de favoritos |
 | Aviso `VIRTUAL_ENV ... does not match` | Um ambiente virtual de outra pasta está ativado. Ele é ignorado pelo `uv run`; rode `deactivate` ou abra um terminal novo. |
