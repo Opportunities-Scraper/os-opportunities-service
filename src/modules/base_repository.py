@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from db.database import Base
-from modules.exceptions import NaoEncontradoError
+from modules.base_exceptions import NaoEncontradoError
 
 
 class BaseRepository[Model: Base]:
